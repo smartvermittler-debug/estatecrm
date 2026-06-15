@@ -1,0 +1,45 @@
+name: Deploy Supabase Edge Functions
+
+on:
+  push:
+    branches:
+      - claude/capabilities-overview-no40ir
+    paths:
+      - "supabase/functions/**"
+      - ".github/workflows/deploy-edge-functions.yml"
+  workflow_dispatch:
+
+env:
+  SUPABASE_PROJECT_REF: knlekgesfoihxvctftrs
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Set Edge Function secrets
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          APP_URL: ${{ secrets.APP_URL }}
+        run: |
+          supabase secrets set \
+            ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" \
+            CRON_SECRET="$CRON_SECRET" \
+            APP_URL="$APP_URL" \
+            --project-ref "$SUPABASE_PROJECT_REF"
+
+      - name: Deploy all edge functions
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          for fn in analyze-document auto-valuation brain-tick create-checkout generate-email generate-expose market-intelligence match-listings profile-builder stripe-webhook weekly-report; do
+            echo "Deploying $fn..."
+            supabase functions deploy "$fn" --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
+          done
