@@ -572,7 +572,7 @@ select cron.schedule(
   '0 8 * * 0',
   $$
   select net.http_post(
-    url := 'https://jvvzzxwrxlpdewjitnvt.supabase.co/functions/v1/weekly-report',
+    url := 'https://knlekgesfoihxvctftrs.supabase.co/functions/v1/weekly-report',
     headers := '{"Authorization": "Bearer ' || current_setting('app.service_role_key', true) || '"}'
   )
   $$
@@ -584,7 +584,7 @@ select cron.schedule(
   '*/15 * * * *',
   $$
   select net.http_post(
-    url := 'https://jvvzzxwrxlpdewjitnvt.supabase.co/functions/v1/brain-tick',
+    url := 'https://knlekgesfoihxvctftrs.supabase.co/functions/v1/brain-tick',
     headers := '{"Authorization": "Bearer ' || current_setting('app.service_role_key', true) || '"}'
   )
   $$

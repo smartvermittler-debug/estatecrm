@@ -124,7 +124,7 @@ export default function SettingsPage() {
         <div className="space-y-2 text-xs">
           <div className="flex justify-between p-2">
             <span className="text-[#666]">Supabase-Projekt</span>
-            <span className="text-[#888] font-mono">jvvzzxwrxlpdewjitnvt</span>
+            <span className="text-[#888] font-mono">knlekgesfoihxvctftrs</span>
           </div>
           <div className="flex justify-between p-2">
             <span className="text-[#666]">KI-Modell</span>
