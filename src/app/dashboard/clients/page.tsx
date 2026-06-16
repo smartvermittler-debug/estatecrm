@@ -48,7 +48,12 @@ export default function ClientsPage() {
   async function loadClients() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    const { data } = await supabase.from("clients").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+    const { data } = await supabase
+      .from("clients")
+      .select("*")
+      .eq("user_id", user.id)
+      .not("full_name", "ilike", "test %")
+      .order("created_at", { ascending: false });
     setClients(data || []);
   }
 
@@ -99,8 +104,8 @@ Sei präzise, auf Deutsch, max 3 Sätze.`
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-3xl font-semibold">Kunden</h1>
-          <p className="text-[#666] text-sm mt-0.5">{clients.length} Kunden im CRM</p>
+          <h1 className="font-display text-3xl font-semibold">Kund:innen</h1>
+          <p className="text-[#666] text-sm mt-0.5">{clients.length} Kund:innen im CRM</p>
         </div>
         <button onClick={() => setShowModal(true)} className="flex items-center gap-2 bg-gradient-to-r from-[#c9a84c] to-[#a07830] text-[#0a0a0a] rounded-lg px-4 py-2 text-sm font-medium hover:shadow-[0_0_15px_rgba(201,168,76,0.3)] transition-all">
           <Plus className="w-4 h-4" />

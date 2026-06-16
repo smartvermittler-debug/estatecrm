@@ -40,11 +40,11 @@ serve(async (req) => {
       });
     }
 
-    // Fetch clients and listings in parallel
+    // Fetch clients and listings in parallel — Test-Kund:innen werden ausgeschlossen
     const [{ data: clients }, { data: listings }] = await Promise.all([
       client_id
-        ? supabase.from("clients").select("*").eq("id", client_id).eq("user_id", user.id)
-        : supabase.from("clients").select("*").eq("user_id", user.id).in("heat_score", ["hot", "warm"]).limit(20),
+        ? supabase.from("clients").select("*").eq("id", client_id).eq("user_id", user.id).not("full_name", "ilike", "test %")
+        : supabase.from("clients").select("*").eq("user_id", user.id).in("heat_score", ["hot", "warm"]).not("full_name", "ilike", "test %").limit(20),
       supabase.from("listings").select("*").eq("user_id", user.id).eq("status", "active").limit(50),
     ]);
 
@@ -125,10 +125,14 @@ Gib nur Immobilien mit Score >= 60 zurück.`;
       const raw = aiData.content[0].text.replace(/```json|```/g, "").trim();
       const matchResult = JSON.parse(raw);
 
-      // Enrich matches with full listing data
+      // Enrich matches with full listing data — Score auf max. 100 begrenzen
       const enrichedMatches = matchResult.matches?.map((m: any) => {
         const listing = listings.find(l => l.id === m.listing_id);
-        return { ...m, listing };
+        return {
+          ...m,
+          match_score: Math.min(100, Math.max(0, Math.round(m.match_score))),
+          listing,
+        };
       }).filter((m: any) => m.listing) || [];
 
       // Save matches to client_memory

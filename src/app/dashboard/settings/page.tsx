@@ -1,36 +1,68 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Settings, Save, Loader2, User, Building, Phone, Globe, Hash, Brain, Bell } from "lucide-react";
+import { Settings, Save, Loader2, User, Building, Hash, Brain, Scan } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+
+// Field außerhalb der Komponente definiert — verhindert Re-Mount bei jedem Render
+function Field({
+  label, value, onChange, placeholder, type = "text",
+}: {
+  label: string;
+  value: string;
+  onChange: (val: string) => void;
+  placeholder: string;
+  type?: string;
+}) {
+  return (
+    <div>
+      <label className="block text-xs text-[#888] mb-1.5">{label}</label>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-4 py-2.5 text-sm text-[#f5f5f5] placeholder:text-[#444] focus:outline-none focus:border-[#c9a84c]/50 focus:ring-1 focus:ring-[#c9a84c]/20 transition-all"
+      />
+    </div>
+  );
+}
 
 export default function SettingsPage() {
   const [profile, setProfile] = useState<any>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
-      if (data) setProfile(data);
+      if (data) {
+        setProfile(data);
+        setIsAdmin(data.role === "admin");
+      }
       setLoading(false);
     }
     load();
   }, []);
 
+  function setField(field: string, val: string) {
+    setProfile((prev: any) => ({ ...prev, [field]: val }));
+  }
+
   async function save() {
     if (!profile) return;
     setSaving(true);
     await supabase.from("profiles").update({
-      full_name: profile.full_name,
-      company_name: profile.company_name,
-      phone: profile.phone,
+      full_name:      profile.full_name,
+      company_name:   profile.company_name,
+      phone:          profile.phone,
       office_address: profile.office_address,
-      gisa_number: profile.gisa_number,
-      website_url: profile.website_url,
-      updated_at: new Date().toISOString(),
+      gisa_number:    profile.gisa_number,
+      website_url:    profile.website_url,
+      updated_at:     new Date().toISOString(),
     }).eq("id", profile.id);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
@@ -43,19 +75,6 @@ export default function SettingsPage() {
     </div>
   );
 
-  const Field = ({ label, field, placeholder, type = "text" }: { label: string; field: string; placeholder: string; type?: string }) => (
-    <div>
-      <label className="block text-xs text-[#888] mb-1.5">{label}</label>
-      <input
-        type={type}
-        value={profile?.[field] || ""}
-        onChange={(e) => setProfile({ ...profile, [field]: e.target.value })}
-        placeholder={placeholder}
-        className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-4 py-2.5 text-sm text-[#f5f5f5] placeholder:text-[#444] focus:outline-none focus:border-[#c9a84c]/50 focus:ring-1 focus:ring-[#c9a84c]/20 transition-all"
-      />
-    </div>
-  );
-
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
@@ -63,33 +82,33 @@ export default function SettingsPage() {
         <p className="text-[#666] text-sm mt-0.5">Ihr Maklerprofil und Präferenzen</p>
       </div>
 
-      {/* Profile section */}
+      {/* Persönliche Daten */}
       <div className="bg-[#111] border border-[#222] rounded-xl p-5">
         <div className="flex items-center gap-2 mb-5">
           <User className="w-4 h-4 text-[#c9a84c]" />
           <h2 className="text-sm font-medium">Persönliche Daten</h2>
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
-          <Field label="Vollständiger Name" field="full_name" placeholder="Mag. Maria Müller" />
-          <Field label="Maklerunternehmen" field="company_name" placeholder="Müller Immobilien GmbH" />
-          <Field label="Telefonnummer" field="phone" placeholder="+43 699 123 45 67" />
-          <Field label="Website" field="website_url" placeholder="https://meine-makleragentur.at" />
+          <Field label="Vollständiger Name"  value={profile?.full_name || ""}    onChange={(v) => setField("full_name", v)}    placeholder="Mag. Maria Müller" />
+          <Field label="Maklerunternehmen"   value={profile?.company_name || ""}  onChange={(v) => setField("company_name", v)} placeholder="Müller Immobilien GmbH" />
+          <Field label="Telefonnummer"        value={profile?.phone || ""}         onChange={(v) => setField("phone", v)}         placeholder="+43 699 123 45 67" />
+          <Field label="Website"             value={profile?.website_url || ""}   onChange={(v) => setField("website_url", v)}  placeholder="https://meine-makleragentur.at" />
         </div>
       </div>
 
-      {/* Company section */}
+      {/* Büro & Zulassung */}
       <div className="bg-[#111] border border-[#222] rounded-xl p-5">
         <div className="flex items-center gap-2 mb-5">
           <Building className="w-4 h-4 text-[#c9a84c]" />
           <h2 className="text-sm font-medium">Büro & Zulassung</h2>
         </div>
         <div className="space-y-4">
-          <Field label="Büroadresse" field="office_address" placeholder="Mariahilfer Straße 100, 1060 Wien" />
-          <Field label="GISA-Zahl (Gewerbebehörde)" field="gisa_number" placeholder="12345678" />
+          <Field label="Büroadresse"                 value={profile?.office_address || ""} onChange={(v) => setField("office_address", v)} placeholder="Mariahilfer Straße 100, 1060 Wien" />
+          <Field label="GISA-Zahl (Gewerbebehörde)"  value={profile?.gisa_number || ""}   onChange={(v) => setField("gisa_number", v)}    placeholder="12345678" />
         </div>
       </div>
 
-      {/* AI settings */}
+      {/* KI-Einstellungen */}
       <div className="bg-[#111] border border-[#222] rounded-xl p-5">
         <div className="flex items-center gap-2 mb-4">
           <Brain className="w-4 h-4 text-[#c9a84c]" />
@@ -97,10 +116,10 @@ export default function SettingsPage() {
         </div>
         <div className="space-y-3">
           {[
-            { label: "KI lernt meinen Schreibstil", desc: "EstateFlow analysiert Ihre E-Mails und passt sich an", enabled: true },
-            { label: "Automatische Follow-up-Erinnerungen", desc: "KI erinnert Sie an überfällige Kundenkontakte", enabled: true },
-            { label: "Wöchentlicher KI-Bericht", desc: "Zusammenfassung Ihrer Aktivitäten jeden Montag", enabled: false },
-            { label: "Automatisches Käufer-Objekt-Matching", desc: "KI findet passende Objekte für neue Kunden", enabled: true },
+            { label: "KI lernt meinen Schreibstil",             desc: "EstateFlow analysiert Ihre E-Mails und passt sich an",          enabled: true },
+            { label: "Automatische Follow-up-Erinnerungen",     desc: "KI erinnert Sie an überfällige Kundenkontakte",                  enabled: true },
+            { label: "Wöchentlicher KI-Bericht",                desc: "Zusammenfassung Ihrer Aktivitäten jeden Montag",                 enabled: false },
+            { label: "Automatisches Käufer-Objekt-Matching",   desc: "KI findet passende Objekte für neue Kund:innen",                 enabled: true },
           ].map((setting) => (
             <div key={setting.label} className="flex items-start justify-between p-3 bg-[#1a1a1a] rounded-lg">
               <div className="flex-1 pr-4">
@@ -115,17 +134,41 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* API info */}
+      {/* Admin-Bereich: Intelligence-Scan (nur für Admins sichtbar) */}
+      {isAdmin && (
+        <div className="bg-[#111] border border-[#c9a84c]/20 rounded-xl p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Scan className="w-4 h-4 text-[#c9a84c]" />
+            <h2 className="text-sm font-medium">Admin — Intelligence-Scan</h2>
+          </div>
+          <p className="text-xs text-[#666] mb-4">
+            Startet eine vollständige KI-Analyse aller Kund:innen und Objekte. Nur für Administratoren.
+          </p>
+          <button
+            className="flex items-center gap-2 bg-[#c9a84c]/10 border border-[#c9a84c]/30 text-[#c9a84c] rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-[#c9a84c]/15 transition-all"
+            onClick={async () => {
+              const { data: { session } } = await supabase.auth.getSession();
+              if (!session) return;
+              await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/match-listings`, {
+                method: "POST",
+                headers: { "Authorization": `Bearer ${session.access_token}`, "Content-Type": "application/json" },
+                body: JSON.stringify({}),
+              });
+            }}
+          >
+            <Scan className="w-4 h-4" />
+            Intelligence-Scan starten
+          </button>
+        </div>
+      )}
+
+      {/* System-Information */}
       <div className="bg-[#111] border border-[#222] rounded-xl p-5">
         <div className="flex items-center gap-2 mb-4">
           <Hash className="w-4 h-4 text-[#c9a84c]" />
           <h2 className="text-sm font-medium">System-Information</h2>
         </div>
         <div className="space-y-2 text-xs">
-          <div className="flex justify-between p-2">
-            <span className="text-[#666]">Supabase-Projekt</span>
-            <span className="text-[#888] font-mono">knlekgesfoihxvctftrs</span>
-          </div>
           <div className="flex justify-between p-2">
             <span className="text-[#666]">KI-Modell</span>
             <span className="text-[#888]">Claude Sonnet 4.6</span>
@@ -137,7 +180,7 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* Save button */}
+      {/* Speichern */}
       <button
         onClick={save}
         disabled={saving}

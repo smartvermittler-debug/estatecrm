@@ -150,8 +150,8 @@ Antworte mit diesem JSON:
       "priority": 1-10,
       "client_id": "uuid oder null",
       "listing_id": "uuid oder null",
-      "signal_type": "new_match|follow_up|urgent_call|birthday",
-      "signal_label": "Kurze Beschreibung auf Deutsch",
+      "signal_type": "new_match|follow_up|urgent_call|birthday|interval_check",
+      "signal_label": "Kurze Beschreibung auf Deutsch (z.B. 'Neues Objekt gefunden', 'Regelmäßiger Check', 'Nachfass erforderlich')",
       "reasoning": "Warum diese Aktion?"
     }
   ],
@@ -173,15 +173,39 @@ Erstelle nur Aktionen wenn es wirklich wichtig ist. Maximal 3 Aktionen.`,
     return;
   }
 
+  // Deutsche Bezeichnungen für Signal-Typen
+  const SIGNAL_LABELS: Record<string, string> = {
+    new_match:      "Neues Objekt gefunden",
+    follow_up:      "Nachfass erforderlich",
+    urgent_call:    "Dringender Anruf",
+    birthday:       "Geburtstag",
+    interval_check: "Regelmäßiger Check",
+  };
+
   // Execute decisions
   for (const action of (decisions.actions || [])) {
     if (action.type === "create_queue_item") {
+      // Listing-Titel vorab laden, um "[NEUES OBJEKT] —" zu vermeiden
+      let listingTitle: string | null = null;
+      if (action.listing_id) {
+        const { data: listingData } = await supabase
+          .from("listings")
+          .select("title")
+          .eq("id", action.listing_id)
+          .single();
+        listingTitle = listingData?.title ?? null;
+      }
+
+      const defaultLabel = SIGNAL_LABELS[action.signal_type] ?? action.signal_type;
+      const label = action.signal_label || defaultLabel;
+
       await supabase.from("relationship_queue").insert({
         user_id: user.id,
         client_id: action.client_id,
         listing_id: action.listing_id,
+        listing_title: listingTitle,
         signal_type: action.signal_type,
-        signal_label: action.signal_label,
+        signal_label: label,
         status: "pending",
         priority: action.priority || 5,
       });

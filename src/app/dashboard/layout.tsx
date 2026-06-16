@@ -4,21 +4,22 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Building2, LayoutDashboard, Users, Home, Mail, FileText,
-  TrendingUp, CreditCard, Settings, Brain, ChevronDown,
-  LogOut, Bell, Menu, X, Zap, Star, BookOpen, Calculator,
+  Settings, Brain, LogOut, Bell, Menu, Zap,
+  BookOpen, Calculator, Inbox, BarChart2,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 const NAV = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Übersicht", exact: true },
-  { href: "/dashboard/clients", icon: Users, label: "Kunden" },
+  { href: "/dashboard/inbox", icon: Inbox, label: "Beziehungs-Inbox" },
+  { href: "/dashboard/clients", icon: Users, label: "Kund:innen" },
   { href: "/dashboard/listings", icon: Home, label: "Objekte" },
-  { href: "/dashboard/emails", icon: Mail, label: "E-Mails" },
-  { href: "/dashboard/documents", icon: FileText, label: "Dokumente" },
-  { href: "/dashboard/expose", icon: BookOpen, label: "Exposé", badge: "KI" },
+  { href: "/dashboard/emails", icon: Mail, label: "KI-E-Mails" },
+  { href: "/dashboard/expose", icon: BookOpen, label: "Expose-Generator", badge: "KI" },
   { href: "/dashboard/valuation", icon: Calculator, label: "Bewertung", badge: "KI" },
-  { href: "/dashboard/market", icon: TrendingUp, label: "Markt" },
-  { href: "/dashboard/billing", icon: CreditCard, label: "Abrechnung" },
+  { href: "/dashboard/templates", icon: FileText, label: "Vorlagen" },
+  { href: "/dashboard/automations", icon: Zap, label: "Automationen" },
+  { href: "/dashboard/reports", icon: BarChart2, label: "Auswertungen" },
   { href: "/dashboard/settings", icon: Settings, label: "Einstellungen" },
 ];
 
@@ -98,7 +99,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           >
             <item.icon className={`w-4 h-4 flex-shrink-0 ${isActive(item) ? "text-[#c9a84c]" : ""}`} />
             <span className="flex-1">{item.label}</span>
-            {item.badge && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-gold-500/20 text-gold-400 border border-gold-500/30">{item.badge}</span>}
+            {item.badge && (
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#c9a84c]/15 text-[#c9a84c] border border-[#c9a84c]/25">
+                {item.badge}
+              </span>
+            )}
           </Link>
         ))}
       </nav>
@@ -114,7 +119,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </div>
 
-      {/* Profile */}
+      {/* Profile footer — zeigt Name und Unternehmen, keine E-Mail */}
       <div className="px-4 py-4 border-t border-[#1a1a1a]">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#c9a84c] to-[#a07830] flex items-center justify-center text-[#0a0a0a] font-semibold text-sm">

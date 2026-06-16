@@ -227,7 +227,7 @@ Nur die Beschreibung, kein Titel, 3-4 Sätze.`
             <div className="grid sm:grid-cols-2 gap-3">
               <div className="sm:col-span-2">
                 <label className="block text-xs text-[#888] mb-1.5">Titel *</label>
-                <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
+                <input value={form.title} onChange={(e) => { const v = e.target.value; setForm(prev => ({ ...prev, title: v })); }}
                   placeholder="Moderne 3-Zimmer-Wohnung mit Terrasse" className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-[#f5f5f5] placeholder:text-[#444] focus:outline-none focus:border-[#c9a84c]/50 transition-all" />
               </div>
               {[
@@ -236,7 +236,7 @@ Nur die Beschreibung, kein Titel, 3-4 Sätze.`
               ].map(({ field, label, placeholder }) => (
                 <div key={field}>
                   <label className="block text-xs text-[#888] mb-1.5">{label}</label>
-                  <input value={(form as any)[field]} onChange={(e) => setForm({ ...form, [field]: e.target.value })}
+                  <input value={(form as any)[field]} onChange={(e) => { const v = e.target.value; setForm(prev => ({ ...prev, [field]: v })); }}
                     placeholder={placeholder} className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-[#f5f5f5] placeholder:text-[#444] focus:outline-none focus:border-[#c9a84c]/50 transition-all" />
                 </div>
               ))}
@@ -263,7 +263,7 @@ Nur die Beschreibung, kein Titel, 3-4 Sätze.`
               ].map(({ field, label, placeholder }) => (
                 <div key={field}>
                   <label className="block text-xs text-[#888] mb-1.5">{label}</label>
-                  <input type="number" value={(form as any)[field]} onChange={(e) => setForm({ ...form, [field]: e.target.value })}
+                  <input type="number" value={(form as any)[field]} onChange={(e) => { const v = e.target.value; setForm(prev => ({ ...prev, [field]: v })); }}
                     placeholder={placeholder} className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-[#f5f5f5] placeholder:text-[#444] focus:outline-none focus:border-[#c9a84c]/50 transition-all" />
                 </div>
               ))}
@@ -285,7 +285,7 @@ Nur die Beschreibung, kein Titel, 3-4 Sätze.`
               <div className="sm:col-span-2 flex flex-wrap gap-4">
                 {[["parking","🚗 Parkplatz"],["balcony","🌿 Balkon"],["garden","🌳 Garten"],["elevator","🛗 Aufzug"]].map(([f, l]) => (
                   <label key={f} className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" checked={(form as any)[f]} onChange={(e) => setForm({ ...form, [f]: e.target.checked })}
+                    <input type="checkbox" checked={(form as any)[f]} onChange={(e) => { const v = e.target.checked; setForm(prev => ({ ...prev, [f]: v })); }}
                       className="w-4 h-4 rounded border-[#333] bg-[#1a1a1a] accent-[#c9a84c]" />
                     <span className="text-sm text-[#888]">{l}</span>
                   </label>
@@ -300,7 +300,7 @@ Nur die Beschreibung, kein Titel, 3-4 Sätze.`
                     KI-Beschreibung generieren
                   </button>
                 </div>
-                <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
+                <textarea value={form.description} onChange={(e) => { const v = e.target.value; setForm(prev => ({ ...prev, description: v })); }}
                   placeholder="Immobilienbeschreibung..."
                   rows={4} className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-2 text-sm text-[#f5f5f5] placeholder:text-[#444] focus:outline-none focus:border-[#c9a84c]/50 transition-all resize-none" />
               </div>
